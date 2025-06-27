@@ -1,27 +1,21 @@
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-const Index = () => {
+const Categories = () => {
   const navigate = useNavigate();
 
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['products'],
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ['categories'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('products')
-        .select(`
-          *,
-          categories (
-            name
-          )
-        `)
+        .from('categories')
+        .select('*')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -48,59 +42,55 @@ const Index = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold text-[#363636]">Produtos</h1>
-              <div className="flex space-x-3">
+              <div className="flex items-center space-x-3">
                 <Button
-                  onClick={() => navigate('/categories')}
-                  variant="outline"
-                  className="border-[#363636] text-[#363636] hover:bg-[#363636] hover:text-white"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/')}
+                  className="text-[#363636] hover:bg-gray-100"
                 >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Gerenciar Categorias
+                  <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <Button
-                  onClick={() => navigate('/add-product')}
-                  className="bg-[#363636] hover:bg-black text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Produto
-                </Button>
+                <h1 className="text-2xl font-semibold text-[#363636]">Categorias</h1>
               </div>
+              <Button
+                onClick={() => navigate('/add-category')}
+                className="bg-[#363636] hover:bg-black text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar Categoria
+              </Button>
             </div>
           </div>
 
           <div className="p-6">
-            {!products || products.length === 0 ? (
+            {!categories || categories.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">Nenhum produto cadastrado ainda.</p>
+                <p className="text-gray-500 mb-4">Nenhuma categoria cadastrada ainda.</p>
                 <Button
-                  onClick={() => navigate('/add-product')}
+                  onClick={() => navigate('/add-category')}
                   className="bg-[#363636] hover:bg-black text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Primeiro Produto
+                  Adicionar Primeira Categoria
                 </Button>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Preço</TableHead>
+                    <TableHead>Nome da Categoria</TableHead>
+                    <TableHead>Data de Criação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map((product) => (
-                    <TableRow key={product.id}>
+                  {categories.map((category) => (
+                    <TableRow key={category.id}>
                       <TableCell className="font-medium text-[#363636]">
-                        {product.name}
+                        {category.name}
                       </TableCell>
                       <TableCell className="text-gray-600">
-                        {product.categories?.name}
-                      </TableCell>
-                      <TableCell className="text-[#363636] font-semibold">
-                        R$ {product.price.toFixed(2).replace('.', ',')}
+                        {new Date(category.created_at).toLocaleDateString('pt-BR')}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -114,4 +104,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Categories;
